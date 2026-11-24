@@ -119,7 +119,7 @@ function pic(i){return i.image_url?'<img src="'+esc(i.image_url)+'" alt="" loadi
 async function loadCustomer(){
   try{
     var r=await sb.from("restaurants").select(RCOLS).eq("slug",slug).maybeSingle();
-    if(r.error){C.err="تعذّر قراءة الالمشروع من قاعدة البيانات. تفاصيل الخطأ: "+(r.error.message||r.error.code||"")+" | "+(r.error.code||"");}
+    if(r.error){C.err="تعذّر قراءة المشروع من قاعدة البيانات. تفاصيل الخطأ: "+(r.error.message||r.error.code||"")+" | "+(r.error.code||"");}
     else if(!r.data){C.err="لم يتم العثور على المشروع باسم «"+slug+"».";}
     else{
       C.rest=r.data;
@@ -159,7 +159,7 @@ function customerHTML(){
     }
     h+='</div></div>';
   }
-  return h+'<p class="foot"><a href="#owner">دخول صاحب الالمشروع</a></p>';
+  return h+'<p class="foot"><a href="#owner">دخول صاحب المشروع</a></p>';
 }
 async function sendOrder(){
   C.err="";
@@ -183,7 +183,7 @@ async function sendOrder(){
   C.busy=false;render();
 }
 
-/* ---------- صاحب الالمشروع ---------- */
+/* ---------- صاحب المشروع ---------- */
 async function initOwner(){
   if(!sb)return;
   var s=await sb.auth.getSession();
@@ -221,10 +221,10 @@ function ownerHTML(){
   if(!O.loaded)return "جارٍ التحميل…";
   var msgH=(O.msg?'<p class="err" role="alert">'+O.msg+'</p>':'')+(O.info?'<p class="okm" role="status">'+O.info+'</p>':'');
   if(!O.user){
-    if(O.mode==="signup")return '<h1>إنشاء حساب صاحب المشروع</h1><div class="card"><div class="f"><label for="rn">اسم الالمشروع (Restaurant name)</label><input id="rn" maxlength="60"></div><div class="f"><label for="rs">اسم الرابط بالإنجليزية، مثل: alnakheel (Link name)</label><input id="rs" maxlength="30" dir="ltr" autocapitalize="none"></div><div class="f"><label for="em">البريد الإلكتروني (Email)</label><input id="em" type="email" dir="ltr" autocomplete="username"></div><div class="f"><label for="pw">كلمة السر، 6 أحرف على الأقل (Password)</label><input id="pw" type="password" autocomplete="new-password"></div>'+msgH+'<button class="pri" id="signup">إنشاء الحساب</button></div><p class="foot"><button class="lnk" data-mode="login">لديّ حساب، دخول</button></p>';
-    return '<h1>دخول صاحب الالمشروع</h1><div class="card"><div class="f"><label for="em">البريد الإلكتروني (Email)</label><input id="em" type="email" dir="ltr" autocomplete="username"></div><div class="f"><label for="pw">كلمة السر (Password)</label><input id="pw" type="password" autocomplete="current-password"></div>'+msgH+'<button class="pri" id="login">دخول</button></div><p class="foot"><button class="lnk" data-mode="signup">ليس لديك حساب؟ إنشاء حساب جديد</button></p><p class="foot"><a href="#">العودة إلى المنيو</a></p>';
+    if(O.mode==="signup")return '<h1>إنشاء حساب صاحب المشروع</h1><div class="card"><div class="f"><label for="rn">اسم المشروع (Restaurant name)</label><input id="rn" maxlength="60"></div><div class="f"><label for="rs">اسم الرابط بالإنجليزية، مثل: alnakheel (Link name)</label><input id="rs" maxlength="30" dir="ltr" autocapitalize="none"></div><div class="f"><label for="em">البريد الإلكتروني (Email)</label><input id="em" type="email" dir="ltr" autocomplete="username"></div><div class="f"><label for="pw">كلمة السر، 6 أحرف على الأقل (Password)</label><input id="pw" type="password" autocomplete="new-password"></div>'+msgH+'<button class="pri" id="signup">إنشاء الحساب</button></div><p class="foot"><button class="lnk" data-mode="login">لديّ حساب، دخول</button></p>';
+    return '<h1>دخول صاحب المشروع</h1><div class="card"><div class="f"><label for="em">البريد الإلكتروني (Email)</label><input id="em" type="email" dir="ltr" autocomplete="username"></div><div class="f"><label for="pw">كلمة السر (Password)</label><input id="pw" type="password" autocomplete="current-password"></div>'+msgH+'<button class="pri" id="login">دخول</button></div><p class="foot"><button class="lnk" data-mode="signup">ليس لديك حساب؟ إنشاء حساب جديد</button></p><p class="foot"><a href="#">العودة إلى المنيو</a></p>';
   }
-  if(!O.rest)return '<h1>أنشئ المشروعك</h1><div class="card"><p class="mt">حسابك جاهز. أدخل بيانات المشروعك لتبدأ.</p><div class="f"><label for="rn">اسم الالمشروع (Restaurant name)</label><input id="rn" maxlength="60"></div><div class="f"><label for="rs">اسم الرابط بالإنجليزية، مثل: alnakheel (Link name)</label><input id="rs" maxlength="30" dir="ltr" autocapitalize="none"></div>'+msgH+'<button class="pri" id="mkRest">إنشاء الالمشروع</button></div><p class="foot"><button class="lnk" data-t="out">خروج</button></p>';
+  if(!O.rest)return '<h1>أنشئ المشروعك</h1><div class="card"><p class="mt">حسابك جاهز. أدخل بيانات المشروعك لتبدأ.</p><div class="f"><label for="rn">اسم المشروع (Restaurant name)</label><input id="rn" maxlength="60"></div><div class="f"><label for="rs">اسم الرابط بالإنجليزية، مثل: alnakheel (Link name)</label><input id="rs" maxlength="30" dir="ltr" autocapitalize="none"></div>'+msgH+'<button class="pri" id="mkRest">إنشاء المشروع</button></div><p class="foot"><button class="lnk" data-t="out">خروج</button></p>';
   var open=O.orders.filter(function(o){return o.status<3}).length;
   var h=hero(O.rest.name,"لوحة التحكم")+'<div class="tabs"><button data-t="orders" class="'+(O.tab==="orders"?'act':'')+'">الطلبات ('+open+')</button><button data-t="items" class="'+(O.tab==="items"?'act':'')+'">الأطباق</button><button data-t="look" class="'+(O.tab==="look"?'act':'')+'">المظهر</button><button data-t="qr" class="'+(O.tab==="qr"?'act':'')+'">رمز QR</button><button data-t="out">خروج</button></div>';
   if(O.tab==="orders"){
@@ -259,7 +259,7 @@ function render(){
 var SLUG=/^[a-z0-9-]{3,30}$/;
 async function createRest(name,slg){
   var r=await sb.from("restaurants").insert({owner_id:O.user.id,name:name,slug:slg}).select(RCOLS).single();
-  if(r.error){O.msg=r.error.code==="23505"?"اسم الرابط مستخدم، اختر اسماً آخر.":"تعذّر إنشاء الالمشروع، حاول مرة أخرى.";return false}
+  if(r.error){O.msg=r.error.code==="23505"?"اسم الرابط مستخدم، اختر اسماً آخر.":"تعذّر إنشاء المشروع، حاول مرة أخرى.";return false}
   O.rest=r.data;O.items=[];O.orders=[];O.tab="items";return true;
 }
 async function act(fn){O.msg="";O.info="";try{await fn();}catch(e){O.msg="حدث خطأ، حاول مرة أخرى.";}render();}
@@ -273,7 +273,7 @@ document.addEventListener("click",function(e){
   if(t.id==="again"){C.done=null;render();return}
   if(t.id==="signup"){act(async function(){
     var n=$("rn").value.trim(),sl=$("rs").value.trim().toLowerCase(),em=$("em").value.trim(),pw=$("pw").value;
-    if(!n||!SLUG.test(sl)){O.msg="اكتب اسم الالمشروع، واسم الرابط بحروف إنجليزية صغيرة وأرقام فقط (3 أحرف على الأقل).";return}
+    if(!n||!SLUG.test(sl)){O.msg="اكتب اسم المشروع، واسم الرابط بحروف إنجليزية صغيرة وأرقام فقط (3 أحرف على الأقل).";return}
     if(pw.length<6){O.msg="كلمة السر يجب أن تكون 6 أحرف على الأقل.";return}
     var r=await sb.auth.signUp({email:em,password:pw});
     if(r.error){O.msg="تعذّر إنشاء الحساب. تأكد من صحة البريد، أو أنه غير مسجّل من قبل.";return}
@@ -282,7 +282,7 @@ document.addEventListener("click",function(e){
   });return}
   if(t.id==="mkRest"){act(async function(){
     var n=$("rn").value.trim(),sl=$("rs").value.trim().toLowerCase();
-    if(!n||!SLUG.test(sl)){O.msg="اكتب اسم الالمشروع، واسم الرابط بحروف إنجليزية صغيرة وأرقام فقط (3 أحرف على الأقل).";return}
+    if(!n||!SLUG.test(sl)){O.msg="اكتب اسم المشروع، واسم الرابط بحروف إنجليزية صغيرة وأرقام فقط (3 أحرف على الأقل).";return}
     await createRest(n,sl);
   });return}
   if(t.id==="send"){sendOrder();return}
