@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>المنيو الرقمي</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;600;700&display=swap">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+:root{--bg:#f4f6f5;--card:#fff;--ink:#17302f;--mut:#5d7473;--line:#d9e2e0;--brand:#0e5a58;--on:#fff;--price:#b4530a;--off:#9aa9a7;--bad:#b3261e;--ok:#1b7a43;color-scheme:light}
+@media (prefers-color-scheme:dark){:root{--bg:#0f1a19;--card:#172524;--ink:#e6efee;--mut:#9db3b1;--line:#2a3d3b;--brand:#4fb8b3;--on:#06201f;--price:#f0a35e;--off:#6c817f;--bad:#ff8a80;--ok:#6fd49a;color-scheme:dark}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"IBM Plex Sans Arabic","Segoe UI",Tahoma,sans-serif;line-height:1.6;padding:env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px)}
+button,input,textarea{font:inherit}button{cursor:pointer}
+:focus-visible{outline:3px solid var(--brand);outline-offset:2px}
+.wrap{max-width:640px;margin:0 auto;padding:0 16px 60px}
+h1{font-size:1.7rem;margin:22px 0 0}h2{font-size:1.1rem;margin:18px 0 8px}
+.sub,.mt{color:var(--mut)}.mt{font-size:.88rem}
+.row{display:flex;gap:12px;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--line)}
+.nm{font-weight:600}.price{color:var(--price);font-weight:700}
+.off{opacity:.55}.tag{font-size:.85rem;color:var(--off);font-weight:600}
+.qty{display:flex;align-items:center;gap:10px}
+.sm{border:1.5px solid var(--brand);background:var(--card);color:var(--brand);border-radius:6px;min-width:34px;height:34px;padding:0 12px}
+.sm.del{border-color:var(--bad);color:var(--bad)}
+.pri{background:var(--brand);color:var(--on);border:0;border-radius:8px;padding:12px 20px;font-weight:700}
+.pri:disabled{background:var(--off);cursor:not-allowed}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px;margin:10px 0}
+.f{display:flex;flex-direction:column;gap:4px;margin:8px 0}.f label{color:var(--mut);font-size:.9rem}
+.f input,.f textarea{padding:10px;border:1px solid var(--line);border-radius:6px;background:var(--card);color:var(--ink)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.sum{position:sticky;bottom:0;background:var(--card);border-top:1px solid var(--line);padding:12px 0;margin-top:16px}
+.tot{font-weight:700;font-size:1.1rem}
+.err{color:var(--bad);font-weight:600;margin:6px 0}.okm{color:var(--ok);font-weight:600}
+.st{display:inline-block;padding:2px 10px;border-radius:999px;border:1px solid var(--line);font-size:.85rem}
+.tabs{display:flex;gap:6px;margin:10px 0;flex-wrap:wrap}
+.tabs button{padding:6px 14px;border:1px solid var(--line);border-radius:999px;background:var(--card);color:var(--ink)}
+.tabs button.act{border-color:var(--brand);color:var(--brand);font-weight:700}
+.foot{margin-top:30px;text-align:center}.foot a{color:var(--mut)}
+#qr{display:inline-block;background:#fff;padding:12px;border-radius:8px;margin-top:8px}
+</style>
+</head>
+<body>
+<div class="wrap"><main id="app">جارٍ التحميل…</main></div>
+<script>
+var SB_URL="https://zayfkpqqplzdglmitbjr.supabase.co";
+var SB_KEY="sb_publishable_bh09vVqac-KhD4EA6BI_vg_F5WYWhDZ";
+var sb=null;
+/* بعض البيئات (مثل نوافذ المعاينة) لا تقبل كائن Headers، فنحوّله إلى كائن عادي قبل الإرسال */
+function safeFetch(url,opts){
+  opts=opts||{};
+  var h=opts.headers;
+  if(h&&typeof h.forEach==="function"&&!Array.isArray(h)){
+    var plain={};h.forEach(function(v,k){plain[k]=v});
+    opts=Object.assign({},opts,{headers:plain});
+  }
+  return fetch(url,opts);
+}
+try{
+  sb=supabase.createClient(SB_URL,SB_KEY,{
+    global:{fetch:safeFetch},
+    auth:{lock:function(name,timeout,fn){return fn();}}
+  });
+}catch(e){}
+
+var qs=new URLSearchParams(location.search);
+var slug=qs.get("r")||"demo";
+var $=function(i){return document.getElementById(i)};
+function esc(s){return String(s).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
+function money(n){return new Intl.NumberFormat("ar-IQ").format(n)+" د.ع"}
+var ST=["جديد","قيد التحضير","جاهز","تم التقديم"],NEXT=["ابدأ التحضير","جاهز","تم التقديم"];
+
+var C={rest:null,items:[],cart:{},table:qs.get("table")||"",note:"",err:"",done:null,loaded:false,busy:false};
+var O={user:null,rest:null,items:[],orders:[],tab:"orders",msg:"",qt:"5",loaded:false,busy:false};
+
+function isOwnerView(){return location.hash==="#owner"}
+
+/* ---------- الزبون ---------- */
+async function loadCustomer(){
+  try{
+    var r=await sb.from("restaurants").select("id,name,slug").eq("slug",slug).maybeSingle();
+    if(r.error){C.err="تعذّر قراءة المطعم من قاعدة البيانات. تفاصيل الخطأ: "+(r.error.message||r.error.code||"")+" | "+(r.error.code||"");}
+    else if(!r.data){C.err="لم يتم العثور على مطعم باسم «"+slug+"».";}
+    else{
+      C.rest=r.data;
+      var m=await sb.from("menu_items").select("*").eq("restaurant_id",r.data.id).order("name");
+      if(m.error)C.err="تعذّر تحميل الأطباق.";else C.items=m.data||[];
+    }
+  }catch(e){C.err="تعذّر الاتصال. تحقق من الإنترنت.";}
+  C.loaded=true;render();
+}
+function customerHTML(){
+  if(!C.loaded)return "جارٍ التحميل…";
+  if(C.err&&!C.rest)return '<p class="err">'+C.err+'</p>';
+  if(C.done)return '<div class="card"><h2>تم إرسال طلبك</h2><p>رقم الطلب: <strong>'+C.done.no+'</strong> | طاولة '+esc(C.done.table)+'</p><p>الدفع نقداً عند الاستلام.</p><button class="pri" id="again">طلب إضافي</button></div>';
+  var h='<h1>'+esc(C.rest.name)+'</h1><p class="sub">اختر أطباقك ثم أرسل الطلب</p>';
+  if(!C.items.length)h+='<p class="mt">لا توجد أصناف في المنيو بعد.</p>';
+  C.items.forEach(function(i){var q=C.cart[i.id]||0;
+    h+='<div class="row'+(i.is_available?'':' off')+'"><div><div class="nm">'+esc(i.name)+'</div><div class="mt"><span class="price">'+money(i.price)+'</span> | '+(i.prep_minutes||0)+' دقيقة</div></div>';
+    if(!i.is_available)h+='<span class="tag">غير متوفر</span>';
+    else if(!q)h+='<button class="sm" data-add="'+i.id+'">أضف</button>';
+    else h+='<div class="qty"><button class="sm" data-plus="'+i.id+'" aria-label="زيادة">+</button><strong>'+q+'</strong><button class="sm" data-minus="'+i.id+'" aria-label="إنقاص">−</button></div>';
+    h+='</div>';});
+  var ch=C.items.filter(function(i){return C.cart[i.id]});
+  if(ch.length){
+    var tot=ch.reduce(function(s,i){return s+i.price*C.cart[i.id]},0),pm=ch.reduce(function(m,i){return Math.max(m,i.prep_minutes||0)},0);
+    h+='<div class="sum"><div class="f"><label for="tb">رقم الطاولة</label><input id="tb" inputmode="numeric" maxlength="10" value="'+esc(C.table)+'"></div>'
+    +'<div class="f"><label for="nt">ملاحظات (اختياري)</label><input id="nt" maxlength="200" value="'+esc(C.note)+'"></div>'
+    +'<p class="mt">طريقة الدفع: نقداً (الدفع الإلكتروني قريباً)</p>'
+    +(C.err?'<p class="err" role="alert">'+C.err+'</p>':'')
+    +'<div class="row" style="border:0"><div><div class="tot">'+money(tot)+'</div><div class="mt">أطول وقت تحضير: حوالي '+pm+' دقيقة</div></div><button class="pri" id="send"'+(C.busy?' disabled':'')+'>'+(C.busy?'جارٍ الإرسال…':'أرسل الطلب')+'</button></div></div>';
+  }
+  return h+'<p class="foot"><a href="#owner">دخول صاحب المطعم</a></p>';
+}
+async function sendOrder(){
+  C.err="";
+  var table=($("tb")?$("tb").value:C.table).trim();C.table=table;C.note=$("nt")?$("nt").value.trim():C.note;
+  if(!table){C.err="أدخل رقم الطاولة.";render();return}
+  C.busy=true;render();
+  try{
+    var ids=Object.keys(C.cart);
+    var f=await sb.from("menu_items").select("id,name,price,is_available").eq("restaurant_id",C.rest.id).in("id",ids);
+    if(f.error)throw f.error;
+    var lines=[],total=0;
+    for(var k=0;k<ids.length;k++){
+      var m=(f.data||[]).find(function(x){return x.id===ids[k]});
+      if(!m||!m.is_available){C.err="«"+(m?m.name:"أحد الأطباق")+"» غير متوفر الآن. أزله من الطلب.";C.busy=false;await loadCustomer();return}
+      lines.push({name:m.name,q:C.cart[ids[k]],p:m.price});total+=m.price*C.cart[ids[k]];
+    }
+    var rows=lines.length?lines:null;
+    var ins=await sb.from("orders").insert({restaurant_id:C.rest.id,table_no:C.note?table+" - "+C.note:table,lines:rows,total:total,payment:"cash",status:0});
+    if(ins.error)throw ins.error;
+    C.done={no:String(Date.now()).slice(-4),table:table};C.cart={};
+  }catch(e){C.err="تعذّر إرسال الطلب، حاول مرة أخرى.";}
+  C.busy=false;render();
+}
+
+/* ---------- صاحب المطعم ---------- */
+async function initOwner(){
+  if(!sb)return;
+  var s=await sb.auth.getSession();
+  O.user=s.data&&s.data.session?s.data.session.user:null;
+  if(O.user)await loadOwner();
+  O.loaded=true;render();
+}
+async function loadOwner(){
+  var r=await sb.from("restaurants").select("id,name,slug").eq("owner_id",O.user.id).limit(1).maybeSingle();
+  O.rest=r.data||null;
+  if(O.rest){await loadItems();await loadOrders();}
+}
+async function loadItems(){var m=await sb.from("menu_items").select("*").eq("restaurant_id",O.rest.id).order("name");O.items=m.data||[];}
+async function loadOrders(){var o=await sb.from("orders").select("*").eq("restaurant_id",O.rest.id).order("created_at",{ascending:false}).limit(50);O.orders=o.data||[];}
+function ownerHTML(){
+  if(!O.loaded)return "جارٍ التحميل…";
+  if(!O.user)return '<h1>دخول صاحب المطعم</h1><div class="card"><div class="f"><label for="em">البريد الإلكتروني (Email)</label><input id="em" type="email" autocomplete="username"></div><div class="f"><label for="pw">كلمة السر (Password)</label><input id="pw" type="password" autocomplete="current-password"></div>'+(O.msg?'<p class="err" role="alert">'+O.msg+'</p>':'')+'<button class="pri" id="login">دخول</button></div><p class="foot"><a href="#">العودة إلى المنيو</a></p>';
+  if(!O.rest)return '<h1>لوحة التحكم</h1><p class="err">لا يوجد مطعم مرتبط بهذا الحساب.</p><button class="sm" data-t="out">خروج</button>';
+  var open=O.orders.filter(function(o){return o.status<3}).length;
+  var h='<h1>'+esc(O.rest.name)+'</h1><div class="tabs"><button data-t="orders" class="'+(O.tab==="orders"?'act':'')+'">الطلبات ('+open+')</button><button data-t="items" class="'+(O.tab==="items"?'act':'')+'">الأطباق</button><button data-t="qr" class="'+(O.tab==="qr"?'act':'')+'">رمز QR</button><button data-t="out">خروج</button></div>';
+  if(O.tab==="orders"){
+    if(!O.orders.length)h+='<p class="mt">لا توجد طلبات بعد. تتحدث القائمة تلقائياً كل 10 ثوانٍ.</p>';
+    O.orders.forEach(function(o){var ls=(o.lines||[]).map(function(l){return esc(l.name)+' ×'+l.q}).join("، ");
+      h+='<div class="card"><div class="row" style="border:0;padding:0"><strong>طاولة '+esc(o.table_no)+'</strong><span class="st">'+ST[o.status]+'</span></div><div class="mt">'+ls+'</div><div class="row" style="border:0;padding-bottom:0"><span class="price">'+money(o.total)+'</span>'+(o.status<3?'<button class="sm" data-adv="'+o.id+'" data-st="'+o.status+'">'+NEXT[o.status]+'</button>':'')+'</div></div>';});
+  }
+  if(O.tab==="items"){
+    h+='<div class="card"><strong>إضافة طبق</strong><div class="grid"><div class="f"><label for="n1">الاسم</label><input id="n1" maxlength="60"></div><div class="f"><label for="p1">السعر (د.ع)</label><input id="p1" inputmode="numeric"></div></div><div class="f"><label for="m1">وقت التحضير (دقائق)</label><input id="m1" inputmode="numeric"></div>'+(O.msg?'<p class="err" role="alert">'+O.msg+'</p>':'')+'<button class="pri" id="addItem">إضافة</button></div>';
+    O.items.forEach(function(i){h+='<div class="row"><div><div class="nm">'+esc(i.name)+'</div><div class="mt">'+money(i.price)+' | '+(i.prep_minutes||0)+' دقيقة</div></div><div class="qty"><button class="sm" data-tog="'+i.id+'">'+(i.is_available?'متوفر':'غير متوفر')+'</button><button class="sm del" data-del="'+i.id+'">حذف</button></div></div>';});
+  }
+  if(O.tab==="qr")h+='<div class="card"><div class="f"><label for="qt">رقم الطاولة</label><input id="qt" inputmode="numeric" value="'+esc(O.qt)+'"></div><p class="mt">اطبع الرمز وضعه على الطاولة. عند مسحه يفتح المنيو وتُسجَّل الطاولة تلقائياً.</p><div id="qr"></div></div>';
+  return h+'<p class="foot"><a href="#">عرض المنيو كزبون</a></p>';
+}
+function drawQR(){var b=$("qr");if(!b||!O.rest)return;b.innerHTML="";
+  var url=location.origin+location.pathname+"?r="+encodeURIComponent(O.rest.slug)+"&table="+encodeURIComponent(O.qt);
+  try{new QRCode(b,{text:url,width:180,height:180});}catch(e){b.textContent="تعذّر رسم الرمز";}
+  var p=document.createElement("p");p.className="mt";p.style.wordBreak="break-all";p.textContent=url;b.parentNode.appendChild(p);}
+
+/* ---------- العرض ---------- */
+function render(){
+  if(!sb){$("app").innerHTML='<p class="err">تعذّر تحميل مكتبة الاتصال. تحقق من الإنترنت وأعد المحاولة.</p>';return}
+  $("app").innerHTML=isOwnerView()?ownerHTML():customerHTML();
+  if(isOwnerView()&&O.user&&O.tab==="qr")drawQR();
+}
+async function act(fn){O.msg="";try{await fn();}catch(e){O.msg="حدث خطأ، حاول مرة أخرى.";}render();}
+
+document.addEventListener("click",function(e){
+  var t=e.target.closest("button");if(!t)return;var d=t.dataset;
+  if(d.add||d.plus){var id=d.add||d.plus;C.cart[id]=Math.min(20,(C.cart[id]||0)+1);C.err="";render();return}
+  if(d.minus){var q=(C.cart[d.minus]||1)-1;if(q<1)delete C.cart[d.minus];else C.cart[d.minus]=q;render();return}
+  if(t.id==="again"){C.done=null;render();return}
+  if(t.id==="send"){sendOrder();return}
+  if(t.id==="login"){act(async function(){
+    var r=await sb.auth.signInWithPassword({email:$("em").value.trim(),password:$("pw").value});
+    if(r.error){O.msg="البريد أو كلمة السر غير صحيحة.";return}
+    O.user=r.data.user;await loadOwner();});return}
+  if(d.t){if(d.t==="out"){act(async function(){await sb.auth.signOut();O.user=null;O.rest=null;O.items=[];O.orders=[];O.tab="orders"});}else{O.tab=d.t;O.msg="";render();}return}
+  if(t.id==="addItem"){act(async function(){
+    var n=$("n1").value.trim(),p=parseInt($("p1").value,10),m=parseInt($("m1").value,10)||10;
+    if(!n||!(p>=0)){O.msg="اكتب اسم الطبق وسعراً صحيحاً.";return}
+    var r=await sb.from("menu_items").insert({restaurant_id:O.rest.id,name:n,price:p,prep_minutes:m,is_available:true});
+    if(r.error)throw r.error;await loadItems();});return}
+  if(d.tog){act(async function(){var it=O.items.find(function(x){return x.id===d.tog});
+    var r=await sb.from("menu_items").update({is_available:!it.is_available}).eq("id",d.tog);if(r.error)throw r.error;await loadItems();});return}
+  if(d.del){if(!confirm("حذف هذا الطبق؟"))return;act(async function(){
+    var r=await sb.from("menu_items").delete().eq("id",d.del);if(r.error)throw r.error;await loadItems();});return}
+  if(d.adv){act(async function(){
+    var r=await sb.from("orders").update({status:parseInt(d.st,10)+1}).eq("id",d.adv);if(r.error)throw r.error;await loadOrders();});return}
+});
+document.addEventListener("input",function(e){
+  if(e.target.id==="tb")C.table=e.target.value;
+  if(e.target.id==="nt")C.note=e.target.value;
+  if(e.target.id==="qt"){O.qt=e.target.value;drawQR()}
+});
+window.addEventListener("hashchange",function(){render()});
+setInterval(function(){
+  if(isOwnerView()&&O.user&&O.rest&&O.tab==="orders"&&!document.hidden){
+    loadOrders().then(render).catch(function(){});}
+},10000);
+
+if(sb){loadCustomer();initOwner();}else render();
+</script>
+</body>
+</html>
