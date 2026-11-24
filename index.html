@@ -37,6 +37,7 @@ h1{font-size:1.7rem;margin:22px 0 0}h2{font-size:1.1rem;margin:18px 0 8px}
 .tabs button{padding:6px 14px;border:1px solid var(--line);border-radius:999px;background:var(--card);color:var(--ink)}
 .tabs button.act{border-color:var(--brand);color:var(--brand);font-weight:700}
 .foot{margin-top:30px;text-align:center}.foot a{color:var(--mut)}
+.lnk{background:none;border:0;color:var(--mut);text-decoration:underline;padding:6px}
 #qr{display:inline-block;background:#fff;padding:12px;border-radius:8px;margin-top:8px}
 </style>
 </head>
@@ -71,7 +72,7 @@ function money(n){return new Intl.NumberFormat("ar-IQ").format(n)+" د.ع"}
 var ST=["جديد","قيد التحضير","جاهز","تم التقديم"],NEXT=["ابدأ التحضير","جاهز","تم التقديم"];
 
 var C={rest:null,items:[],cart:{},table:qs.get("table")||"",note:"",err:"",done:null,loaded:false,busy:false};
-var O={user:null,rest:null,items:[],orders:[],tab:"orders",msg:"",qt:"5",loaded:false,busy:false};
+var O={user:null,rest:null,items:[],orders:[],tab:"orders",msg:"",info:"",mode:"login",qt:"5",loaded:false,busy:false};
 
 function isOwnerView(){return location.hash==="#owner"}
 
@@ -152,8 +153,12 @@ async function loadItems(){var m=await sb.from("menu_items").select("*").eq("res
 async function loadOrders(){var o=await sb.from("orders").select("*").eq("restaurant_id",O.rest.id).order("created_at",{ascending:false}).limit(50);O.orders=o.data||[];}
 function ownerHTML(){
   if(!O.loaded)return "جارٍ التحميل…";
-  if(!O.user)return '<h1>دخول صاحب المطعم</h1><div class="card"><div class="f"><label for="em">البريد الإلكتروني (Email)</label><input id="em" type="email" autocomplete="username"></div><div class="f"><label for="pw">كلمة السر (Password)</label><input id="pw" type="password" autocomplete="current-password"></div>'+(O.msg?'<p class="err" role="alert">'+O.msg+'</p>':'')+'<button class="pri" id="login">دخول</button></div><p class="foot"><a href="#">العودة إلى المنيو</a></p>';
-  if(!O.rest)return '<h1>لوحة التحكم</h1><p class="err">لا يوجد مطعم مرتبط بهذا الحساب.</p><button class="sm" data-t="out">خروج</button>';
+  var msgH=(O.msg?'<p class="err" role="alert">'+O.msg+'</p>':'')+(O.info?'<p class="okm" role="status">'+O.info+'</p>':'');
+  if(!O.user){
+    if(O.mode==="signup")return '<h1>إنشاء حساب صاحب مطعم</h1><div class="card"><div class="f"><label for="rn">اسم المطعم (Restaurant name)</label><input id="rn" maxlength="60"></div><div class="f"><label for="rs">اسم الرابط بالإنجليزية، مثل: alnakheel (Link name)</label><input id="rs" maxlength="30" dir="ltr" autocapitalize="none"></div><div class="f"><label for="em">البريد الإلكتروني (Email)</label><input id="em" type="email" dir="ltr" autocomplete="username"></div><div class="f"><label for="pw">كلمة السر، 6 أحرف على الأقل (Password)</label><input id="pw" type="password" autocomplete="new-password"></div>'+msgH+'<button class="pri" id="signup">إنشاء الحساب</button></div><p class="foot"><button class="lnk" data-mode="login">لديّ حساب، دخول</button></p>';
+    return '<h1>دخول صاحب المطعم</h1><div class="card"><div class="f"><label for="em">البريد الإلكتروني (Email)</label><input id="em" type="email" dir="ltr" autocomplete="username"></div><div class="f"><label for="pw">كلمة السر (Password)</label><input id="pw" type="password" autocomplete="current-password"></div>'+msgH+'<button class="pri" id="login">دخول</button></div><p class="foot"><button class="lnk" data-mode="signup">ليس لديك حساب؟ إنشاء حساب جديد</button></p><p class="foot"><a href="#">العودة إلى المنيو</a></p>';
+  }
+  if(!O.rest)return '<h1>أنشئ مطعمك</h1><div class="card"><p class="mt">حسابك جاهز. أدخل بيانات مطعمك لتبدأ.</p><div class="f"><label for="rn">اسم المطعم (Restaurant name)</label><input id="rn" maxlength="60"></div><div class="f"><label for="rs">اسم الرابط بالإنجليزية، مثل: alnakheel (Link name)</label><input id="rs" maxlength="30" dir="ltr" autocapitalize="none"></div>'+msgH+'<button class="pri" id="mkRest">إنشاء المطعم</button></div><p class="foot"><button class="lnk" data-t="out">خروج</button></p>';
   var open=O.orders.filter(function(o){return o.status<3}).length;
   var h='<h1>'+esc(O.rest.name)+'</h1><div class="tabs"><button data-t="orders" class="'+(O.tab==="orders"?'act':'')+'">الطلبات ('+open+')</button><button data-t="items" class="'+(O.tab==="items"?'act':'')+'">الأطباق</button><button data-t="qr" class="'+(O.tab==="qr"?'act':'')+'">رمز QR</button><button data-t="out">خروج</button></div>';
   if(O.tab==="orders"){
@@ -177,15 +182,36 @@ function drawQR(){var b=$("qr");if(!b||!O.rest)return;b.innerHTML="";
 function render(){
   if(!sb){$("app").innerHTML='<p class="err">تعذّر تحميل مكتبة الاتصال. تحقق من الإنترنت وأعد المحاولة.</p>';return}
   $("app").innerHTML=isOwnerView()?ownerHTML():customerHTML();
-  if(isOwnerView()&&O.user&&O.tab==="qr")drawQR();
+  if(isOwnerView()&&O.user&&O.rest&&O.tab==="qr")drawQR();
 }
-async function act(fn){O.msg="";try{await fn();}catch(e){O.msg="حدث خطأ، حاول مرة أخرى.";}render();}
+var SLUG=/^[a-z0-9-]{3,30}$/;
+async function createRest(name,slg){
+  var r=await sb.from("restaurants").insert({owner_id:O.user.id,name:name,slug:slg}).select("id,name,slug").single();
+  if(r.error){O.msg=r.error.code==="23505"?"اسم الرابط مستخدم، اختر اسماً آخر.":"تعذّر إنشاء المطعم، حاول مرة أخرى.";return false}
+  O.rest=r.data;O.items=[];O.orders=[];O.tab="items";return true;
+}
+async function act(fn){O.msg="";O.info="";try{await fn();}catch(e){O.msg="حدث خطأ، حاول مرة أخرى.";}render();}
 
 document.addEventListener("click",function(e){
   var t=e.target.closest("button");if(!t)return;var d=t.dataset;
   if(d.add||d.plus){var id=d.add||d.plus;C.cart[id]=Math.min(20,(C.cart[id]||0)+1);C.err="";render();return}
   if(d.minus){var q=(C.cart[d.minus]||1)-1;if(q<1)delete C.cart[d.minus];else C.cart[d.minus]=q;render();return}
+  if(d.mode){O.mode=d.mode;O.msg="";O.info="";render();return}
   if(t.id==="again"){C.done=null;render();return}
+  if(t.id==="signup"){act(async function(){
+    var n=$("rn").value.trim(),sl=$("rs").value.trim().toLowerCase(),em=$("em").value.trim(),pw=$("pw").value;
+    if(!n||!SLUG.test(sl)){O.msg="اكتب اسم المطعم، واسم الرابط بحروف إنجليزية صغيرة وأرقام فقط (3 أحرف على الأقل).";return}
+    if(pw.length<6){O.msg="كلمة السر يجب أن تكون 6 أحرف على الأقل.";return}
+    var r=await sb.auth.signUp({email:em,password:pw});
+    if(r.error){O.msg="تعذّر إنشاء الحساب. تأكد من صحة البريد، أو أنه غير مسجّل من قبل.";return}
+    if(r.data.session){O.user=r.data.user;await createRest(n,sl);}
+    else{O.mode="login";O.info="تم إنشاء الحساب. افتح بريدك وأكّد الرسالة، ثم ادخل وسيطلب منك إنشاء مطعمك.";}
+  });return}
+  if(t.id==="mkRest"){act(async function(){
+    var n=$("rn").value.trim(),sl=$("rs").value.trim().toLowerCase();
+    if(!n||!SLUG.test(sl)){O.msg="اكتب اسم المطعم، واسم الرابط بحروف إنجليزية صغيرة وأرقام فقط (3 أحرف على الأقل).";return}
+    await createRest(n,sl);
+  });return}
   if(t.id==="send"){sendOrder();return}
   if(t.id==="login"){act(async function(){
     var r=await sb.auth.signInWithPassword({email:$("em").value.trim(),password:$("pw").value});
