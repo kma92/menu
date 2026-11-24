@@ -230,7 +230,7 @@ function ownerHTML(){
   if(O.tab==="orders"){
     if(!O.orders.length)h+='<p class="mt">لا توجد طلبات بعد. تتحدث القائمة تلقائياً كل 10 ثوانٍ.</p>';
     O.orders.forEach(function(o){var ls=(o.lines||[]).map(function(l){return esc(l.name)+' ×'+l.q}).join("، ");
-      h+='<div class="card"><div class="row" style="border:0;padding:0"><strong>طاولة '+esc(o.table_no)+'</strong><span class="st">'+ST[o.status]+'</span></div><div class="mt">'+ls+'</div><div class="row" style="border:0;padding-bottom:0"><span class="price">'+money(o.total)+'</span>'+(o.status<3?'<button class="sm" data-adv="'+o.id+'" data-st="'+o.status+'">'+NEXT[o.status]+'</button>':'')+'</div></div>';});
+      h+='<div class="card"><div class="row" style="border:0;padding:0"><strong>طاولة '+esc(o.table_no)+'</strong><span class="st">'+ST[o.status]+'</span></div><div class="mt">🕒 '+fmtT(o.created_at)+'</div><div class="mt">'+ls+'</div><div class="row" style="border:0;padding-bottom:0"><span class="price">'+money(o.total)+'</span>'+(o.status<3?'<button class="sm" data-adv="'+o.id+'" data-st="'+o.status+'">'+NEXT[o.status]+'</button>':'')+'</div></div>';});
   }
   if(O.tab==="items"){
     h+='<div class="card"><strong>إضافة طبق</strong><div class="grid"><div class="f"><label for="n1">الاسم</label><input id="n1" maxlength="60"></div><div class="f"><label for="p1">السعر (د.ع)</label><input id="p1" inputmode="numeric"></div></div><div class="f"><label for="m1">وقت التحضير (دقائق)</label><input id="m1" inputmode="numeric"></div><div class="f"><label for="im">صورة الطبق (اختياري)</label><input id="im" type="file" accept="image/*"></div>'+msgH+'<button class="pri" id="addItem">إضافة</button></div>';
