@@ -105,7 +105,7 @@ var $=function(i){return document.getElementById(i)};
 function esc(s){return String(s).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
 function money(n){return new Intl.NumberFormat("ar-IQ").format(n)+" د.ع"}
 var ST=["جديد","قيد التحضير","جاهز","تم التقديم"],NEXT=["ابدأ التحضير","جاهز","تم التقديم"];
-var COLORS=["#0e5a58","#b3261e","#c2570c","#2e7d32","#1f5fa8","#6a3fa0","#2b2b2b"];
+function fmtT(t){if(!t)return"";var d=new Date(t),m=Math.round((Date.now()-d.getTime())/60000),s=d.toLocaleString("ar-IQ",{weekday:"long",day:"numeric",month:"long",hour:"numeric",minute:"2-digit"});var r=m<1?"الآن":m<60?"منذ "+m+" دقيقة":m<1440?"منذ "+Math.floor(m/60)+" ساعة":"";return s+(r?" ("+r+")":"")}var COLORS=["#0e5a58","#b3261e","#c2570c","#2e7d32","#1f5fa8","#6a3fa0","#2b2b2b"];
 var RCOLS="id,name,slug,color";
 
 var C={rest:null,items:[],cart:{},table:qs.get("table")||"",note:"",err:"",done:null,open:false,loaded:false,busy:false};
