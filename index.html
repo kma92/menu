@@ -120,7 +120,7 @@ async function loadCustomer(){
   try{
     var r=await sb.from("restaurants").select(RCOLS).eq("slug",slug).maybeSingle();
     if(r.error){C.err="تعذّر قراءة المشروع من قاعدة البيانات. تفاصيل الخطأ: "+(r.error.message||r.error.code||"")+" | "+(r.error.code||"");}
-    else if(!r.data){C.err="لم يتم العثور على مطعم باسم «"+slug+"».";}
+    else if(!r.data){C.err="لم يتم العثور على مشروع باسم «"+slug+"».";}
     else{
       C.rest=r.data;
       var m=await sb.from("menu_items").select("*").eq("restaurant_id",r.data.id).order("name");
@@ -221,10 +221,10 @@ function ownerHTML(){
   if(!O.loaded)return "جارٍ التحميل…";
   var msgH=(O.msg?'<p class="err" role="alert">'+O.msg+'</p>':'')+(O.info?'<p class="okm" role="status">'+O.info+'</p>':'');
   if(!O.user){
-    if(O.mode==="signup")return '<h1>إنشاء حساب صاحب مطعم</h1><div class="card"><div class="f"><label for="rn">اسم المشروع (Restaurant name)</label><input id="rn" maxlength="60"></div><div class="f"><label for="rs">اسم الرابط بالإنجليزية، مثل: alnakheel (Link name)</label><input id="rs" maxlength="30" dir="ltr" autocapitalize="none"></div><div class="f"><label for="em">البريد الإلكتروني (Email)</label><input id="em" type="email" dir="ltr" autocomplete="username"></div><div class="f"><label for="pw">كلمة السر، 6 أحرف على الأقل (Password)</label><input id="pw" type="password" autocomplete="new-password"></div>'+msgH+'<button class="pri" id="signup">إنشاء الحساب</button></div><p class="foot"><button class="lnk" data-mode="login">لديّ حساب، دخول</button></p>';
+    if(O.mode==="signup")return '<h1>إنشاء حساب صاحب مشروع</h1><div class="card"><div class="f"><label for="rn">اسم المشروع (Restaurant name)</label><input id="rn" maxlength="60"></div><div class="f"><label for="rs">اسم الرابط بالإنجليزية، مثل: alnakheel (Link name)</label><input id="rs" maxlength="30" dir="ltr" autocapitalize="none"></div><div class="f"><label for="em">البريد الإلكتروني (Email)</label><input id="em" type="email" dir="ltr" autocomplete="username"></div><div class="f"><label for="pw">كلمة السر، 6 أحرف على الأقل (Password)</label><input id="pw" type="password" autocomplete="new-password"></div>'+msgH+'<button class="pri" id="signup">إنشاء الحساب</button></div><p class="foot"><button class="lnk" data-mode="login">لديّ حساب، دخول</button></p>';
     return '<h1>دخول صاحب المشروع</h1><div class="card"><div class="f"><label for="em">البريد الإلكتروني (Email)</label><input id="em" type="email" dir="ltr" autocomplete="username"></div><div class="f"><label for="pw">كلمة السر (Password)</label><input id="pw" type="password" autocomplete="current-password"></div>'+msgH+'<button class="pri" id="login">دخول</button></div><p class="foot"><button class="lnk" data-mode="signup">ليس لديك حساب؟ إنشاء حساب جديد</button></p><p class="foot"><a href="#">العودة إلى المنيو</a></p>';
   }
-  if(!O.rest)return '<h1>أنشئ مطعمك</h1><div class="card"><p class="mt">حسابك جاهز. أدخل بيانات مطعمك لتبدأ.</p><div class="f"><label for="rn">اسم المشروع (Restaurant name)</label><input id="rn" maxlength="60"></div><div class="f"><label for="rs">اسم الرابط بالإنجليزية، مثل: alnakheel (Link name)</label><input id="rs" maxlength="30" dir="ltr" autocapitalize="none"></div>'+msgH+'<button class="pri" id="mkRest">إنشاء المشروع</button></div><p class="foot"><button class="lnk" data-t="out">خروج</button></p>';
+  if(!O.rest)return '<h1>أنشئ مشروعك</h1><div class="card"><p class="mt">حسابك جاهز. أدخل بيانات مشروعك لتبدأ.</p><div class="f"><label for="rn">اسم المشروع (Restaurant name)</label><input id="rn" maxlength="60"></div><div class="f"><label for="rs">اسم الرابط بالإنجليزية، مثل: alnakheel (Link name)</label><input id="rs" maxlength="30" dir="ltr" autocapitalize="none"></div>'+msgH+'<button class="pri" id="mkRest">إنشاء المشروع</button></div><p class="foot"><button class="lnk" data-t="out">خروج</button></p>';
   var open=O.orders.filter(function(o){return o.status<3}).length;
   var h=hero(O.rest.name,"لوحة التحكم")+'<div class="tabs"><button data-t="orders" class="'+(O.tab==="orders"?'act':'')+'">الطلبات ('+open+')</button><button data-t="items" class="'+(O.tab==="items"?'act':'')+'">الأطباق</button><button data-t="look" class="'+(O.tab==="look"?'act':'')+'">المظهر</button><button data-t="qr" class="'+(O.tab==="qr"?'act':'')+'">رمز QR</button><button data-t="out">خروج</button></div>';
   if(O.tab==="orders"){
@@ -237,7 +237,7 @@ function ownerHTML(){
     O.items.forEach(function(i){h+='<div class="row">'+(i.image_url?'<img class="thumb" src="'+esc(i.image_url)+'" alt="">':'<div class="thumb e">🍽️</div>')+'<div style="flex:1;min-width:0"><div class="nm">'+esc(i.name)+'</div><div class="mt">'+money(i.price)+' | '+(i.prep_minutes||0)+' دقيقة</div></div><div class="qty" style="background:none"><label class="sm lab">صورة<input type="file" accept="image/*" data-img="'+i.id+'" hidden></label><button class="sm" data-tog="'+i.id+'">'+(i.is_available?'متوفر':'غير متوفر')+'</button><button class="sm del" data-del="'+i.id+'">حذف</button></div></div>';});
   }
   if(O.tab==="look"){
-    h+='<div class="card"><strong>لون مطعمك</strong><p class="mt">يظهر في رأس المنيو والأزرار عند الزبائن.</p><div class="sw">'+COLORS.map(function(c){return '<button class="swb'+(O.rest.color===c?' sel':'')+'" style="background:'+c+'" data-color="'+c+'" aria-label="لون"></button>'}).join("")+'</div>'+msgH+'</div>';
+    h+='<div class="card"><strong>لون مشروعك</strong><p class="mt">يظهر في رأس المنيو والأزرار عند الزبائن.</p><div class="sw">'+COLORS.map(function(c){return '<button class="swb'+(O.rest.color===c?' sel':'')+'" style="background:'+c+'" data-color="'+c+'" aria-label="لون"></button>'}).join("")+'</div>'+msgH+'</div>';
   }
   if(O.tab==="qr")h+='<div class="card"><div class="f"><label for="qt">رقم الطاولة</label><input id="qt" inputmode="numeric" value="'+esc(O.qt)+'"></div><p class="mt">اطبع الرمز وضعه على الطاولة. عند مسحه يفتح المنيو وتُسجَّل الطاولة تلقائياً.</p><div id="qr"></div></div>';
   return h+'<p class="foot"><a href="#">عرض المنيو كزبون</a></p>';
@@ -278,7 +278,7 @@ document.addEventListener("click",function(e){
     var r=await sb.auth.signUp({email:em,password:pw});
     if(r.error){O.msg="تعذّر إنشاء الحساب. تأكد من صحة البريد، أو أنه غير مسجّل من قبل.";return}
     if(r.data.session){O.user=r.data.user;await createRest(n,sl);}
-    else{O.mode="login";O.info="تم إنشاء الحساب. افتح بريدك وأكّد الرسالة، ثم ادخل وسيطلب منك إنشاء مطعمك.";}
+    else{O.mode="login";O.info="تم إنشاء الحساب. افتح بريدك وأكّد الرسالة، ثم ادخل وسيطلب منك إنشاء مشروعك.";}
   });return}
   if(t.id==="mkRest"){act(async function(){
     var n=$("rn").value.trim(),sl=$("rs").value.trim().toLowerCase();
