@@ -19,7 +19,7 @@ try{
 }catch(e){}
 
 var qs=new URLSearchParams(location.search);
-async function loadCustomer(){
+async function loadCustomer(){if(!slug){C.loaded=true;render();return}
 var $=function(i){return document.getElementById(i)};
 function esc(s){return String(s).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
 function money(n){return new Intl.NumberFormat("ar-IQ").format(n)+" د.ع"}
@@ -38,7 +38,7 @@ function hero(name,sub,pill){return '<header class="hero"><h1>'+esc(name)+'</h1>
 function pic(i){return i.image_url?'<img src="'+esc(i.image_url)+'" alt="" loading="lazy">':'<div class="ph">🍽️</div>'}
 
 /* ---------- الزبون ---------- */
-async function loadCustomer(){
+async function loadCustomer(){if(!slug){C.loaded=true;render();return}
   try{
     var r=await sb.from("restaurants").select(RCOLS).eq("slug",slug).maybeSingle();
     if(r.error){C.err="تعذّر قراءة المشروع من قاعدة البيانات. تفاصيل الخطأ: "+(r.error.message||r.error.code||"")+" | "+(r.error.code||"");}
