@@ -32,7 +32,7 @@ async function uploadImg(file){
   }catch(e){O.msg="تعذّر رفع الصورة. تأكد أنك شغّلت كود الصور في Supabase.";return null;}
 }
 
-function ownerHTML(){
+function menuUrl(t){return location.origin+location.pathname+"?r="+encodeURIComponent(O.rest.slug)+(t?"&table="+encodeURIComponent(t):"")}function ownerHTML(){
   if(!O.loaded)return "جارٍ التحميل…";
   var msgH=(O.msg?'<p class="err" role="alert">'+O.msg+'</p>':'')+(O.info?'<p class="okm" role="status">'+O.info+'</p>':'');
   if(!O.user){
