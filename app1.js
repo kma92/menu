@@ -19,7 +19,7 @@ try{
 }catch(e){}
 
 var qs=new URLSearchParams(location.search);
-var slug=qs.get("r")||"demo";
+async function loadCustomer(){
 var $=function(i){return document.getElementById(i)};
 function esc(s){return String(s).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
 function money(n){return new Intl.NumberFormat("ar-IQ").format(n)+" د.ع"}
