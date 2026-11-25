@@ -41,8 +41,8 @@ function pic(i){return i.image_url?'<img src="'+esc(i.image_url)+'" alt="" loadi
 async function loadCustomer(){
   try{
     var r=await sb.from("restaurants").select(RCOLS).eq("slug",slug).maybeSingle();
-    if(r.error){C.err="تعذّر قراءة المطعم من قاعدة البيانات. تفاصيل الخطأ: "+(r.error.message||r.error.code||"")+" | "+(r.error.code||"");}
-    else if(!r.data){C.err="لم يتم العثور على مطعم باسم «"+slug+"».";}
+    if(r.error){C.err="تعذّر قراءة المشروع من قاعدة البيانات. تفاصيل الخطأ: "+(r.error.message||r.error.code||"")+" | "+(r.error.code||"");}
+    else if(!r.data){C.err="لم يتم العثور على مشروع باسم «"+slug+"».";}
     else{
       C.rest=r.data;
       var m=await sb.from("menu_items").select("*").eq("restaurant_id",r.data.id).order("name");
@@ -81,7 +81,7 @@ function customerHTML(){
     }
     h+='</div></div>';
   }
-  return h+'<p class="foot"><a href="#owner">دخول صاحب المطعم</a></p>';
+  return h+'<p class="foot"><a href="#owner">دخول صاحب المشروع</a></p>';
 }
 async function sendOrder(){
   C.err="";
