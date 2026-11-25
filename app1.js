@@ -19,7 +19,7 @@ try{
 }catch(e){}
 
 var qs=new URLSearchParams(location.search);
-var slug=qs.get("r")||"demo";
+var slug=(qs.get("r")||"").toLowerCase();
 var $=function(i){return document.getElementById(i)};
 function esc(s){return String(s).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
 function money(n){return new Intl.NumberFormat("ar-IQ").format(n)+" د.ع"}
@@ -38,7 +38,7 @@ function hero(name,sub,pill){return '<header class="hero"><h1>'+esc(name)+'</h1>
 function pic(i){return i.image_url?'<img src="'+esc(i.image_url)+'" alt="" loading="lazy">':'<div class="ph">🍽️</div>'}
 
 /* ---------- الزبون ---------- */
-async function loadCustomer(){
+async function loadCustomer(){if(!slug){loadDir();return}
   try{
     var r=await sb.from("restaurants").select(RCOLS).eq("slug",slug).maybeSingle();
     if(r.error){C.err="تعذّر قراءة المشروع من قاعدة البيانات. تفاصيل الخطأ: "+(r.error.message||r.error.code||"")+" | "+(r.error.code||"");}
@@ -51,7 +51,7 @@ async function loadCustomer(){
   }catch(e){C.err="تعذّر الاتصال. تحقق من الإنترنت.";}
   C.loaded=true;render();
 }
-function customerHTML(){
+function customerHTML(){if(!slug)return dirHTML();if(!slug)return hero("المنيو الرقمي","امسح رمز QR الموجود على طاولتك لعرض المنيو وإرسال طلبك")+'<p class="foot"><a href="#owner">دخول صاحب المشروع</a></p>';
   if(!C.loaded)return "جارٍ التحميل…";
   if(C.err&&!C.rest)return '<p class="err">'+C.err+'</p>';
   if(C.done)return hero(C.rest.name,"")+'<div class="card"><h2>تم إرسال طلبك ✅</h2><p>رقم الطلب: <strong>'+C.done.no+'</strong> | طاولة '+esc(C.done.table)+'</p><p class="mt">🕒 '+fmtT(C.done.at)+'</p><p>الدفع نقداً عند الاستلام.</p><button class="pri" id="again">طلب إضافي</button></div>';
@@ -81,7 +81,7 @@ function customerHTML(){
     }
     h+='</div></div>';
   }
-  return h+'<p class="foot"><a href="#owner">دخول صاحب المشروع</a></p>';
+  return h;
 }
 async function sendOrder(){
   C.err="";
