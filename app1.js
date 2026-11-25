@@ -51,7 +51,7 @@ async function loadCustomer(){if(!slug){C.loaded=true;render();return}
   }catch(e){C.err="تعذّر الاتصال. تحقق من الإنترنت.";}
   C.loaded=true;render();
 }
-function customerHTML(){
+function customerHTML(){if(!slug)return hero("المنيو الرقمي","امسح رمز QR الموجود على طاولتك لعرض المنيو وإرسال طلبك")+'<p class="foot"><a href="#owner">دخول صاحب المشروع</a></p>';
   if(!C.loaded)return "جارٍ التحميل…";
   if(C.err&&!C.rest)return '<p class="err">'+C.err+'</p>';
   if(C.done)return hero(C.rest.name,"")+'<div class="card"><h2>تم إرسال طلبك ✅</h2><p>رقم الطلب: <strong>'+C.done.no+'</strong> | طاولة '+esc(C.done.table)+'</p><p class="mt">🕒 '+fmtT(C.done.at)+'</p><p>الدفع نقداً عند الاستلام.</p><button class="pri" id="again">طلب إضافي</button></div>';
