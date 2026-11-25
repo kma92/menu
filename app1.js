@@ -81,7 +81,7 @@ function customerHTML(){if(!slug)return hero("المنيو الرقمي","امس
     }
     h+='</div></div>';
   }
-  return h+'<p class="foot"><a href="#owner">دخول صاحب المشروع</a></p>';
+  return h;
 }
 async function sendOrder(){
   C.err="";
