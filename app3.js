@@ -14,7 +14,7 @@ document.addEventListener("click",function(e){
     var r=await sb.auth.signUp({email:em,password:pw});
     if(r.error){var sm=(r.error.message||"").toLowerCase();O.msg=sm.indexOf("already")>-1?"هذا البريد مسجّل من قبل. اضغط «لديّ حساب، دخول».":sm.indexOf("rate")>-1?"تجاوزت حدّ الإرسال. حاول بعد ساعة، أو أوقف تأكيد البريد من Supabase.":sm.indexOf("password")>-1?"كلمة السر ضعيفة. استخدم 6 أحرف على الأقل وأرقاماً وحروفاً.":"تعذّر إنشاء الحساب: "+r.error.message;return}
     if(r.data.session){O.user=r.data.user;await createRest(n,sl);}
-    else{O.mode="login";O.info="تم إنشاء الحساب. افتح بريدك وأكّد الرسالة، ثم ادخل وسيطلب منك إنشاء مطعمك.";}
+    else{O.mode="login";O.info="تم إنشاء الحساب. افتح بريدك وأكّد الرسالة، ثم ادخل وسيطلب منك إنشاء مشروعك.";}
   });return}
   if(t.id==="mkRest"){act(async function(){
     var n=$("rn").value.trim(),sl=$("rs").value.trim().toLowerCase();
