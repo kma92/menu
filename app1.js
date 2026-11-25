@@ -19,7 +19,7 @@ try{
 }catch(e){}
 
 var qs=new URLSearchParams(location.search);
-async function loadCustomer(){if(!slug){C.loaded=true;render();return}
+var slug=(qs.get("r")||"").toLowerCase();
 var $=function(i){return document.getElementById(i)};
 function esc(s){return String(s).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
 function money(n){return new Intl.NumberFormat("ar-IQ").format(n)+" د.ع"}
@@ -103,4 +103,19 @@ async function sendOrder(){
     C.done={no:String(Date.now()).slice(-4),table:table,at:new Date().toISOString()};C.cart={};C.open=false;
   }catch(e){C.err="تعذّر إرسال الطلب، حاول مرة أخرى.";}
   C.busy=false;render();
+}
+
+/* استعادة كلمة السر: عند فتح الرابط الذي وصل بالبريد */
+try{
+  sb.auth.onAuthStateChange(function(ev){
+    if(ev==="PASSWORD_RECOVERY"){
+      O.mode="reset";O.loaded=true;
+      if(location.hash!=="#owner")location.hash="#owner";
+      if(typeof render==="function")render();
+    }
+  });
+}catch(e){}
+if(location.hash.indexOf("otp_expired")>-1||location.hash.indexOf("error_code")>-1){
+  O.mode="forgot";O.msg="انتهت صلاحية رابط الاستعادة أو أنه غير صالح. اطلب رابطاً جديداً.";
+  location.hash="#owner";
 }
