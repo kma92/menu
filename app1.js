@@ -28,7 +28,7 @@ function fmtT(t){if(!t)return"";var d=new Date(t),m=Math.round((Date.now()-d.get
 function beep(){try{if(!AC)return;[0,0.3,0.6].forEach(function(t){var o=AC.createOscillator(),g=AC.createGain();o.frequency.value=880;g.gain.value=0.3;o.connect(g);g.connect(AC.destination);o.start(AC.currentTime+t);o.stop(AC.currentTime+t+0.2);});}catch(e){}}
 function markSeen(){O.seen={};O.orders.forEach(function(o){O.seen[o.id]=1});}
 var COLORS=["#0e5a58","#b3261e","#c2570c","#2e7d32","#1f5fa8","#6a3fa0","#2b2b2b"];
-var RCOLS="id,name,slug,color";
+var RCOLS="id,name,slug,color,approved";
 
 var C={rest:null,items:[],cart:{},table:qs.get("table")||"",note:"",err:"",done:null,open:false,loaded:false,busy:false};
 var O={user:null,rest:null,items:[],orders:[],tab:"orders",msg:"",info:"",mode:"login",qt:"5",snd:false,seen:null,loaded:false,busy:false};
