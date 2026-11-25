@@ -56,7 +56,7 @@ function menuUrl(t){return location.origin+location.pathname+"?r="+encodeURIComp
     h+='<div class="card"><strong>لون مشروعك</strong><p class="mt">يظهر في رأس المنيو والأزرار عند الزبائن.</p><div class="sw">'+COLORS.map(function(c){return '<button class="swb'+(O.rest.color===c?' sel':'')+'" style="background:'+c+'" data-color="'+c+'" aria-label="لون"></button>'}).join("")+'</div>'+msgH+'</div>';
   }
   if(O.tab==="qr")h+='<div class="card"><div class="f"><label for="qt">رقم الطاولة</label><input id="qt" inputmode="numeric" value="'+esc(O.qt)+'"></div><p class="mt">اطبع الرمز وضعه على الطاولة. عند مسحه يفتح المنيو وتُسجَّل الطاولة تلقائياً.</p><div id="qr"></div></div>';
-  return h+'<p class="foot"><a href="#">عرض المنيو كزبون</a></p>';
+  return h+'<p class="foot"><a href="'+menuUrl("5")+'">عرض المنيو كزبون</a></p>';
 }
 function drawQR(){var b=$("qr");if(!b||!O.rest)return;b.innerHTML="";
   var url=location.origin+location.pathname+"?r="+encodeURIComponent(O.rest.slug)+"&table="+encodeURIComponent(O.qt);
