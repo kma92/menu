@@ -44,6 +44,7 @@ function dirList(){
 function dirHTML(){
   if(!D.loaded)return "جارٍ التحميل…";
   var h=hero("دليل الخدمات","ابحث عن مطعم أو فندق أو صيدلية أو وسيلة نقل أو شركة توصيل");
+  h+='<p style="margin:14px 0 0"><a href="#" style="color:var(--mut)">← الرجوع إلى الصفحة الرئيسية</a></p>';
   h+='<div class="f" style="margin-top:18px"><label for="dq">بحث</label><input id="dq" type="search" value="'+esc(D.q)+'" placeholder="مثال: الكرادة أو فندق أو صيدلية"></div><div class="tabs">';
   Object.keys(DT).forEach(function(k){h+='<button data-ty="'+k+'" class="'+(D.type===k?'act':'')+'">'+DT[k]+'</button>'});
   h+='</div><label style="display:flex;gap:8px;align-items:center;margin:8px 0"><input type="checkbox" id="donly" '+(D.only?'checked':'')+'> المتاح الآن فقط</label>';
