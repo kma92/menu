@@ -51,7 +51,15 @@ async function loadCustomer(){if(!slug){loadDir();return}
   }catch(e){C.err="تعذّر الاتصال. تحقق من الإنترنت.";}
   C.loaded=true;render();
 }
-function customerHTML(){if(!slug)return dirHTML();if(!slug)return hero("المنيو الرقمي","امسح رمز QR الموجود على طاولتك لعرض المنيو وإرسال طلبك")+'<p class="foot"><a href="#owner">دخول صاحب المشروع</a></p>';
+/* الواجهة الأولى: خياران */
+function landingHTML(){
+  var b="display:block;text-decoration:none;color:inherit;margin-top:18px";
+  return hero("المنيو الرقمي","اختر كيف تريد أن تدخل")
+  +'<a class="card" href="#directory" style="'+b+'"><div style="font-size:2.2rem">🧭</div><strong style="font-size:1.2rem">أنا زبون</strong><p class="mt" style="margin:4px 0 0">ابحث عن مطعم أو فندق أو صيدلية أو وسيلة نقل أو شركة توصيل</p></a>'
+  +'<a class="card" href="#owner" style="display:block;text-decoration:none;color:inherit"><div style="font-size:2.2rem">🏪</div><strong style="font-size:1.2rem">أنا صاحب مشروع</strong><p class="mt" style="margin:4px 0 0">ادخل لإدارة مشروعك أو أنشئ حساباً جديداً</p></a>';
+}
+function customerHTML(){
+  if(!slug)return location.hash==="#directory"?dirHTML():landingHTML();
   if(!C.loaded)return "جارٍ التحميل…";
   if(C.err&&!C.rest)return '<p class="err">'+C.err+'</p>';
   if(C.done)return hero(C.rest.name,"")+'<div class="card"><h2>تم إرسال طلبك ✅</h2><p>رقم الطلب: <strong>'+C.done.no+'</strong> | طاولة '+esc(C.done.table)+'</p><p class="mt">🕒 '+fmtT(C.done.at)+'</p><p>الدفع نقداً عند الاستلام.</p><button class="pri" id="again">طلب إضافي</button></div>';
